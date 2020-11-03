@@ -4,15 +4,16 @@ import os
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import pandas as pd
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import plotly.graph_objs as go
 import re
 from datetime import datetime as dt
 
-import pandas as pd
 from dash.dependencies import Input, Output
 from bond_df import master_df,bond_names,fix_date
+PLOTLY_LOGO = "https://images.plot.ly/logo/new-branding/plotly-logomark.png"
 
 ###Initialise stuff
 app = dash.Dash(suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.MINTY])
@@ -103,11 +104,22 @@ fig_graph = make_graph(df, "",default_start_date,default_end_date)
 
 
 navbar = dbc.Navbar([
+    html.A(
+                # Use row and col to control vertical alignment of logo / brand
+                dbc.Row(
+                    [
+                        dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px")),
+                    ],
+                    # align="center",
+                    no_gutters=True,
+                ),
+                href="https://plot.ly",
+            ),
         dbc.Row([
-                dbc.Col(html.Figure(html.Span([html.Span(className = 'bottom'),
-                                                html.Span(className = 'top')],
-                                                className = 'letter n')),
-                                                className = 'letter-wrapper'),
+                # dbc.Col(html.Figure(html.Span([html.Span(className = 'bottom'),
+                #                                 html.Span(className = 'top')],
+                #                                 className = 'letter n')),
+                #                                 className = 'letter-wrapper'),
                 dbc.Col(dbc.NavLink("Home", href="#",style=dict(color='#ffffff'))),
                     dbc.Col(dbc.NavLink(" ", href="/page-1",style=dict(color='#ffffff'))),
                     dbc.Col(dbc.NavLink(" ", href="/page-2",style=dict(color='#ffffff')))
