@@ -35,12 +35,6 @@ bond_names2 = {
     '1': 'ten year bond',
     'L': 'long term bond'
 }
-# def fix_date(date):
-#     if isinstance(date,str):
-#         return date
-#     date = date.to_pydatetime(date)
-#     date = str(date)[:10]
-#     return date
 
 def get_df_helper(link):
     df_series, df = vi.get_series_observations(link, response_format='csv')
