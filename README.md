@@ -1,9 +1,9 @@
 # Bond-Price-Visualization
 
-[Click here](https://bond-visualization-app.herokuapp.com ) to view this project. Or download and run `pip3 install -r requirements.txt` then `python3 app.py`
+CLone and run `conda install --file requirements.txt -c plotly -c conda-forge -c anaconda && pip install pyvalet==0.1` then `python app.py`
 
 ## Description:
-This is a visualization project I did in summer 2020. The main goal was to learn tools that went into building websites and pretty graphs.
+This is a visualization project I did in summer 2020. The main goal was to learn tools that went into building websites and pretty graphs. A few years later, I added forecasting components based on techniques and algorithms I learned during university.
 
 ## Tools Used:
 

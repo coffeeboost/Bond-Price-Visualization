@@ -1,15 +1,10 @@
 from pyvalet import ValetInterpreter
-import requests
 import pandas as pd
-from datetime import datetime as dt
-import re
+import plotly.graph_objs as go
+import plotly.express as px
 vi = ValetInterpreter()
 
-# vi = ValetInterpreter()
-# df_series, df = vi.get_series_observations("BD.CDN.2YR.DQ.YLD", response_format='csv')
-# print(df)
-
-
+# Sample Data:
 # BOC/V39055    Government of Canada benchmark bond yields - 10 year    daily https://www.bankofcanada.ca/valet/series/BD.CDN.10YR.DQ.YLD
 # BOC/V39051    Government of Canada benchmark bond yields - 2 year    daily https://www.bankofcanada.ca/valet/series/BD.CDN.2YR.DQ.YLD
 # BOC/V39052    Government of Canada benchmark bond yields - 3 year    daily https://www.bankofcanada.ca/valet/series/BD.CDN.3YR.DQ.YLD
@@ -40,62 +35,97 @@ bond_names2 = {
     '1': 'ten year bond',
     'L': 'long term bond'
 }
-def fix_date(date):
-    # print(date)
-    # print(type(date))
-    # start_date = dt.strptime(re.split('T| ', start_date)[0], '%Y-%m-%d')
-    # start_date_string = start_date.strftime('%B %d, %Y')
-    # timestamp.dt.strftime('%Y-%m-%d')
-    if isinstance(date,str):
-        return date
-    date = date.to_pydatetime(date)
-    date = str(date)[:10]
-    # date = dt.strptime(re.split('T| ', date)[0], '%Y-%m-%d')
+# def fix_date(date):
+#     if isinstance(date,str):
+#         return date
+#     date = date.to_pydatetime(date)
+#     date = str(date)[:10]
+#     return date
 
-    # date = dt.strptime(re.split('T| ', date)[0], '%Y-%m-%d')
-    # date = date.strftime('%B %d, %Y')
-    return date
-
-def get_df(link):
-    # print(vi.series_list())
-    df_series, df = vi.get_series_observations(link,response_format='csv')
-    # print(df)
+def get_df_helper(link):
+    df_series, df = vi.get_series_observations(link, response_format='csv')
     df.columns = ['Date','Value','Bond type']
     df = df.set_index('Date')
     df.index = pd.to_datetime(df.index)
-    # print(df['Bond type'])
-    # df['Bond type'] = df['Bond type'].apply(lambda x: bond_names[df_series['label']])
+    df = df.sort_index()
     df['Bond type'] = bond_names2[link[7]]
-    print(df)
-    # print(df)
     return df
-frames = [get_df(link) for link in links]
-master_df = pd.concat(frames)
-#columns :
-#date, bond type, bond type
-# print(master_df)
 
-# print(df.head())
+def get_df():
+    frames = [get_df_helper(link) for link in links]
+    df = pd.concat(frames)
+    return df
 
-'''Name: 0, dtype: object
->>> df_series['label']
-'V39056'
->>> df_series['id']
-'BD.CDN.LONG.DQ.YLD'
->>> df_series['description']
-'Government of Canada Benchmark Bond Yields - Long-Term'
->>> df_series.size
-3
->>>
-'''
-'''id                                            BD.CDN.LONG.DQ.YLD
-label                                                     V39056
-description    Government of Canada Benchmark Bond Yields - L...
-Name: 0, dtype: object
-'''
-'''           id label description
-3     2001-01-02  5.52         NaN
-4     2001-01-03  5.63         NaN
-5     2001-01-04  5.62         NaN'''
+def get_fig(df):
+    return px.line(df)
 
-#returns df that is date(index, datetime format), bond type, value
+def make_figure_table(df,value,start_date,end_date):
+    if value:
+        df = df[df['Bond type']==bond_names[value]]
+    
+    df = df.sort_index().loc[start_date:end_date]
+    fig_table = go.Figure(
+                    data= [go.Table(
+                    header=dict(values=['Date','Values']),
+                    cells=dict(values=[df.index.strftime("%d %b %Y"),df.Value]))],
+              )
+    fig_table.layout.paper_bgcolor = "#525252"
+    fig_table.layout.title = {'font':{'color':"#fefffc"},'text':f"{bond_names[value] if value else 'All'} data numbers"}
+
+    return fig_table
+
+def make_graph(df,value,start_date,end_date):
+    if value:
+        df = df[df['Bond type']==bond_names[value]]
+
+    df = df.pivot(columns='Bond type',values='Value')
+    df = df.loc[start_date:end_date]
+
+    fig = go.Figure()
+    for col in df:
+        fig.add_trace(go.Scatter(x=list(df.index),y=list(df[col]),name=col))
+
+    fig.update_layout(
+    xaxis=dict(
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1,
+                     label="1m",
+                     step="month",
+                     stepmode="backward"),
+                dict(count=6,
+                     label="6m",
+                     step="month",
+                     stepmode="backward"),
+                dict(count=1,
+                     label="YTD",
+                     step="year",
+                     stepmode="todate"),
+                dict(count=1,
+                     label="1y",
+                     step="year",
+                     stepmode="backward"),
+                dict(step="all")
+            ])
+        ),
+        rangeslider=dict(
+            visible=True
+        ),
+        type="date"
+    ))
+    fig.layout.paper_bgcolor = "#525252"
+    fig.layout.yaxis = {'title':{'text':'Value($)'},'color':'#fefffc'}
+    fig.layout.xaxis.tickfont = {'color':'#fefffc'}
+    fig.layout.legend = {'bgcolor':'#525252','font':{'color':'#fefffc'}}
+    fig.layout.title = {'font':{'color':"#fefffc"},'text':f"{bond_names[value] if value else 'All'} daily bond yield"}
+
+    return fig
+
+
+def get_marks(df):
+    dates = df.index.strftime("%b %Y").unique()
+    marks = {}
+    for i in range(dates.size):
+        marks[i] = dates[i]
+    return marks
+
