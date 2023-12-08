@@ -14,3 +14,10 @@ Data take from: [Bank of Canada](https://www.bankofcanada.ca/valet/docs )
 ) (Dash is built on top of Flask)
 <br>Deployment: [Heroku](https://www.heroku.com)
 
+
+## Analysis
+- Autoregresion
+- Moving Average
+- RNN
+- LSTM
+- GRU
