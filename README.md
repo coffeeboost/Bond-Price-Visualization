@@ -1,6 +1,6 @@
 # Bond-Price-Visualization
 
-CLone and run `conda install --file requirements.txt -c plotly -c conda-forge -c anaconda -c pytorch && pip install pyvalet==0.1` then `python app.py`
+Clone and run `conda install --file requirements.txt -c plotly -c conda-forge -c anaconda -c pytorch && pip install pyvalet==0.1` then `python app.py`
 
 ## Description:
 This is a visualization project started in summer 2020. The main goal was to learn tools that went into building websites and pretty graphs. A few years later, I added forecasting components based on techniques and algorithms I learned during university.
